@@ -1,0 +1,62 @@
+{
+  "extensionName": {
+    "message": "WeAINote"
+  },
+  "extensionDescription": {
+    "message": "基于当前网页提供AI总结等服务的Chrome插件"
+  },
+  "configPageTitle": {
+    "message": "WeAINote 配置"
+  },
+  "aiServiceConfig": {
+    "message": "AI 服务配置"
+  },
+  "apiUrl": {
+    "message": "API URL"
+  },
+  "apiKey": {
+    "message": "API Key"
+  },
+  "model": {
+    "message": "模型"
+  },
+  "temperature": {
+    "message": "温度"
+  },
+  "maxTokens": {
+    "message": "最大 Token 数"
+  },
+  "testConnection": {
+    "message": "测试连接"
+  },
+  "saveConfig": {
+    "message": "保存配置"
+  },
+  "dataManagement": {
+    "message": "数据管理"
+  },
+  "exportConfig": {
+    "message": "导出配置"
+  },
+  "importConfig": {
+    "message": "导入配置"
+  },
+  "promptManagement": {
+    "message": "提示词管理"
+  },
+  "categoryManagement": {
+    "message": "分类管理"
+  },
+  "newCategory": {
+    "message": "新分类名称"
+  },
+  "addCategory": {
+    "message": "添加分类"
+  },
+  "promptTemplate": {
+    "message": "提示词模板"
+  },
+  "addPrompt": {
+    "message": "添加提示词"
+  }
+}

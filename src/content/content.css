@@ -1,0 +1,316 @@
+/* 悬浮气泡样式 */
+.weainote-float-button {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 50px;
+    height: 50px;
+    background-color: #4CAF50;
+    border-radius: 50%;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    z-index: 10000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: transform 0.2s ease;
+}
+
+.weainote-float-button:hover {
+    transform: scale(1.1);
+}
+
+.weainote-float-button::before {
+    content: "AI";
+    color: white;
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* 对话窗口样式 */
+.weainote-dialog {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    width: 400px;
+    height: 500px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    z-index: 10001;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.weainote-dialog.hidden {
+    display: none;
+}
+
+.weainote-dialog-header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.weainote-dialog-title {
+    margin: 0;
+    font-size: 18px;
+}
+
+.weainote-dialog-controls {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.weainote-dialog-history-btn,
+.weainote-dialog-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 4px;
+}
+
+.weainote-dialog-history-btn:hover,
+.weainote-dialog-close:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.weainote-dialog-close {
+    font-size: 20px;
+    padding: 0 5px;
+}
+
+.weainote-prompt-select {
+    padding: 5px;
+    border-radius: 4px;
+    border: none;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 14px;
+}
+
+.weainote-dialog-messages {
+    flex: 1;
+    padding: 15px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.weainote-message {
+    max-width: 80%;
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 18px;
+    word-wrap: break-word;
+}
+
+.weainote-user-message {
+    align-self: flex-end;
+    background-color: #4CAF50;
+    color: white;
+    border-bottom-right-radius: 5px;
+}
+
+.weainote-ai-message {
+    align-self: flex-start;
+    background-color: #f1f1f1;
+    color: #333;
+    border-bottom-left-radius: 5px;
+}
+
+.weainote-dialog-input {
+    display: flex;
+    padding: 15px;
+    border-top: 1px solid #eee;
+    gap: 10px;
+}
+
+.weainote-input-field {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 20px;
+    outline: none;
+}
+
+.weainote-send-button,
+.weainote-save-button {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+}
+
+.weainote-send-button:hover,
+.weainote-save-button:hover {
+    background-color: #45a049;
+}
+
+.weainote-send-button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+.weainote-save-button {
+    background-color: #2196F3;
+}
+
+.weainote-save-button:hover {
+    background-color: #1976D2;
+}
+
+/* Markdown 渲染样式 */
+.weainote-markdown-content {
+    line-height: 1.5;
+}
+
+.weainote-markdown-content h1,
+.weainote-markdown-content h2,
+.weainote-markdown-content h3 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+
+.weainote-markdown-content p {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+.weainote-markdown-content ul,
+.weainote-markdown-content ol {
+    padding-left: 20px;
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+
+.weainote-markdown-content li {
+    margin-bottom: 0.5em;
+}
+
+.weainote-markdown-content code {
+    background-color: #f1f1f1;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.weainote-markdown-content pre {
+    background-color: #f1f1f1;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+}
+
+.weainote-markdown-content pre code {
+    background-color: transparent;
+    padding: 0;
+}
+
+.weainote-markdown-content blockquote {
+    border-left: 4px solid #4CAF50;
+    padding-left: 16px;
+    margin-left: 0;
+    margin-right: 0;
+    color: #666;
+}
+
+.weainote-markdown-content a {
+    color: #4CAF50;
+    text-decoration: none;
+}
+
+.weainote-markdown-content a:hover {
+    text-decoration: underline;
+}
+
+/* 流式输出动画 */
+.weainote-streaming-cursor {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background-color: #4CAF50;
+    margin-left: 4px;
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* 对话历史样式 */
+.weainote-history-list h4 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.weainote-history-item {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.weainote-history-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 5px;
+}
+
+.weainote-history-date {
+    font-size: 12px;
+    color: #666;
+}
+
+.weainote-history-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.weainote-history-load,
+.weainote-history-delete {
+    padding: 3px 8px;
+    font-size: 12px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.weainote-history-load {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.weainote-history-load:hover {
+    background-color: #45a049;
+}
+
+.weainote-history-delete {
+    background-color: #F44336;
+    color: white;
+}
+
+.weainote-history-delete:hover {
+    background-color: #D32F2F;
+}
+
+.weainote-history-preview {
+    font-size: 14px;
+    color: #444;
+    background-color: #f9f9f9;
+    padding: 8px;
+    border-radius: 4px;
+}

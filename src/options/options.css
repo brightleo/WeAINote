@@ -1,0 +1,296 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f5f5f5;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.language-selector {
+    text-align: right;
+    margin-bottom: 20px;
+}
+
+.language-selector label {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+h1 {
+    color: #333;
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+h2 {
+    color: #555;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 10px;
+}
+
+h3 {
+    color: #555;
+    margin-top: 0;
+}
+
+.config-section {
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+
+input, select, textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+input[type="range"] {
+    width: calc(100% - 50px);
+}
+
+#temperature-value {
+    display: inline-block;
+    width: 40px;
+    text-align: right;
+}
+
+.button-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+button {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    display: inline-block;
+    flex: 1;
+    min-width: 120px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#test-api {
+    background-color: #2196F3;
+    flex: 1;
+    min-width: 120px;
+}
+
+#test-api:hover {
+    background-color: #1976D2;
+}
+
+.test-result {
+    margin: 10px 0;
+    padding: 10px;
+    border-radius: 4px;
+    display: none;
+    clear: both;
+}
+
+.test-result.success {
+    background-color: #dff0d8;
+    color: #3c763d;
+    border: 1px solid #d6e9c6;
+}
+
+.test-result.error {
+    background-color: #f2dede;
+    color: #a94442;
+    border: 1px solid #ebccd1;
+}
+
+.category-section, .prompt-section {
+    margin-bottom: 20px;
+}
+
+.category-controls, .prompt-controls {
+    margin-bottom: 15px;
+}
+
+#category-list, #prompt-list {
+    list-style-type: none;
+    padding: 0;
+}
+
+#category-list li, #prompt-list li {
+    padding: 10px;
+    border: 1px solid #eee;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#prompt-list li {
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.prompt-category {
+    font-size: 12px;
+    color: #666;
+    margin: 5px 0;
+}
+
+.prompt-content {
+    font-size: 14px;
+    color: #444;
+    background-color: #f9f9f9;
+    padding: 8px;
+    border-radius: 4px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.category-actions, .prompt-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.edit-btn, .delete-btn {
+    padding: 5px 10px;
+    font-size: 12px;
+}
+
+.edit-btn {
+    background-color: #FF9800;
+}
+
+.edit-btn:hover {
+    background-color: #F57C00;
+}
+
+.delete-btn {
+    background-color: #F44336;
+}
+
+.delete-btn:hover {
+    background-color: #D32F2F;
+}
+
+.save-btn {
+    background-color: #4CAF50;
+}
+
+.save-btn:hover {
+    background-color: #45a049;
+}
+
+.cancel-btn {
+    background-color: #9E9E9E;
+}
+
+.cancel-btn:hover {
+    background-color: #616161;
+}
+
+/* 模态框样式 */
+.modal {
+    display: block;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 10% auto;
+    padding: 0;
+    border: 1px solid #888;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 600px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+.modal-header {
+    padding: 15px 20px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 8px 8px 0 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h3 {
+    margin: 0;
+    color: white;
+}
+
+.modal-close {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.modal-close:hover {
+    color: #eee;
+}
+
+.modal-body {
+    padding: 20px;
+}
+
+.modal-footer {
+    padding: 15px 20px;
+    background-color: #f9f9f9;
+    border-radius: 0 0 8px 8px;
+    text-align: right;
+}
+
+.modal-footer button {
+    margin-left: 10px;
+}
+
+/* 数据管理部分样式 */
+.data-management {
+    padding: 15px;
+    background-color: #f9f9f9;
+    border-radius: 4px;
+}
+
+.data-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.data-actions button {
+    flex: 1;
+    min-width: 120px;
+}

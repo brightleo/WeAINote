@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WeAINote</title>
+    <style>
+        body {
+            width: 300px;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .header h1 {
+            margin: 0;
+            color: #4CAF50;
+            font-size: 20px;
+        }
+        
+        .header p {
+            margin: 5px 0 10px 0;
+            color: #666;
+        }
+        
+        .config-status {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-ok {
+            background-color: #4CAF50;
+        }
+        
+        .status-missing {
+            background-color: #F44336;
+        }
+        
+        .features {
+            margin-bottom: 20px;
+        }
+        
+        .feature {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .feature-icon {
+            width: 20px;
+            height: 20px;
+            background-color: #4CAF50;
+            border-radius: 50%;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+        
+        .actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        button {
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .config-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+        
+        .config-btn:hover {
+            background-color: #1976D2;
+        }
+        
+        .help-btn {
+            background-color: #9E9E9E;
+            color: white;
+        }
+        
+        .help-btn:hover {
+            background-color: #616161;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>WeAINote</h1>
+        <p>AI 驱动的网页助手</p>
+    </div>
+    
+    <div class="features">
+        <div class="feature">
+            <div class="feature-icon">1</div>
+            <div>网页内容智能总结</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">2</div>
+            <div>自定义提示词模板</div>
+        </div>
+        <div class="feature">
+            <div class="feature-icon">3</div>
+            <div>对话历史保存</div>
+        </div>
+    </div>
+    
+    <div class="actions">
+        <button class="config-btn" id="open-config">打开配置页面</button>
+        <button class="help-btn" id="get-help">使用帮助</button>
+    </div>
+    
+    <script src="../src/popup/popup.js"></script>
+</body>
+</html>

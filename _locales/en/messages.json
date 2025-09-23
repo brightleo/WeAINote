@@ -1,0 +1,62 @@
+{
+  "extensionName": {
+    "message": "WeAINote"
+  },
+  "extensionDescription": {
+    "message": "Chrome extension that provides AI summarization and other services based on the current webpage"
+  },
+  "configPageTitle": {
+    "message": "WeAINote Configuration"
+  },
+  "aiServiceConfig": {
+    "message": "AI Service Configuration"
+  },
+  "apiUrl": {
+    "message": "API URL"
+  },
+  "apiKey": {
+    "message": "API Key"
+  },
+  "model": {
+    "message": "Model"
+  },
+  "temperature": {
+    "message": "Temperature"
+  },
+  "maxTokens": {
+    "message": "Max Tokens"
+  },
+  "testConnection": {
+    "message": "Test Connection"
+  },
+  "saveConfig": {
+    "message": "Save Configuration"
+  },
+  "dataManagement": {
+    "message": "Data Management"
+  },
+  "exportConfig": {
+    "message": "Export Configuration"
+  },
+  "importConfig": {
+    "message": "Import Configuration"
+  },
+  "promptManagement": {
+    "message": "Prompt Management"
+  },
+  "categoryManagement": {
+    "message": "Category Management"
+  },
+  "newCategory": {
+    "message": "New Category Name"
+  },
+  "addCategory": {
+    "message": "Add Category"
+  },
+  "promptTemplate": {
+    "message": "Prompt Template"
+  },
+  "addPrompt": {
+    "message": "Add Prompt"
+  }
+}
