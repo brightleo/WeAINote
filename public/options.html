@@ -18,41 +18,76 @@
         
         <h1>WeAINote 配置</h1>
         
-        <div class="config-section">
-            <h2>AI 服务配置</h2>
-            <form id="api-config-form">
-                <div class="form-group">
-                    <label for="api-url">API URL:</label>
-                    <input type="text" id="api-url" placeholder="请输入 API URL，例如 https://api.openai.com/v1/chat/completions">
+        <!-- Tab导航 -->
+        <div class="tab-navigation">
+            <button class="tab-button active" data-tab="ai-config">AI 服务配置</button>
+            <button class="tab-button" data-tab="prompt-config">提示词管理</button>
+        </div>
+        
+        <!-- Tab内容 -->
+        <div class="tab-content">
+            <!-- AI 服务配置 Tab -->
+            <div class="tab-pane active" id="ai-config-tab">
+                <div class="config-section">
+                    <form id="api-config-form">
+                        <div class="form-group">
+                            <label for="api-url">API URL:</label>
+                            <input type="text" id="api-url" placeholder="请输入 API URL，例如 https://api.openai.com/v1/chat/completions">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="api-key">API Key:</label>
+                            <input type="password" id="api-key" placeholder="请输入您的 API Key">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="model">模型:</label>
+                            <input type="text" id="model" placeholder="请输入模型名称，例如 gpt-3.5-turbo">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="temperature">温度:</label>
+                            <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
+                            <span id="temperature-value">0.7</span>
+                        </div>
+                        <div class="form-group">
+                            <label for="max-tokens">最大 Token 数:</label>
+                            <input type="number" id="max-tokens" min="1" max="4096" value="1024">
+                        </div>
+                        <div class="form-group button-group">
+                            <button type="button" id="test-api">测试连接</button>
+                        </div>
+                        <div id="test-result" class="test-result"></div>
+                    </form>
                 </div>
-                
-                <div class="form-group">
-                    <label for="api-key">API Key:</label>
-                    <input type="password" id="api-key" placeholder="请输入您的 API Key">
+            </div>
+            
+            <!-- 提示词管理 Tab -->
+            <div class="tab-pane" id="prompt-config-tab">
+                <div class="config-section">
+                    <div class="prompt-management">
+                        <!-- 系统提示词部分 -->
+                        <div class="prompt-section">
+                            <h3>系统提示词</h3>
+                            <div class="system-prompts-container">
+                                <ul id="system-prompt-list"></ul>
+                            </div>
+                        </div>
+                        
+                        <!-- 用户提示词部分 -->
+                        <div class="prompt-section">
+                            <h3>提示词模板</h3>
+                            <div class="prompt-controls">
+                                <button id="add-prompt">添加提示词</button>
+                            </div>
+                            <ul id="prompt-list"></ul>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="form-group">
-                    <label for="model">模型:</label>
-                    <input type="text" id="model" placeholder="请输入模型名称，例如 gpt-3.5-turbo">
-                </div>
-                
-                <div class="form-group">
-                    <label for="temperature">温度:</label>
-                    <input type="range" id="temperature" min="0" max="1" step="0.1" value="0.7">
-                    <span id="temperature-value">0.7</span>
-                </div>
-                <div class="form-group">
-                    <label for="max-tokens">最大 Token 数:</label>
-                    <input type="number" id="max-tokens" min="1" max="4096" value="1024">
-                </div>
-                <div class="form-group button-group">
-                    <button type="button" id="test-api">测试连接</button>
-                    <button type="submit">保存配置</button>
-                </div>
-                <div id="test-result" class="test-result"></div>
-            </form>
+            </div>
         </div>
 
+        <!-- 数据管理 -->
         <div class="config-section">
             <h2>数据管理</h2>
             <div class="data-management">
@@ -64,28 +99,10 @@
                 <div id="import-result" class="test-result"></div>
             </div>
         </div>
-
-        <div class="config-section">
-            <h2>提示词管理</h2>
-            <div class="prompt-management">
-                <div class="category-section">
-                    <h3>分类管理</h3>
-                    <div class="category-controls">
-                        <input type="text" id="new-category" placeholder="新分类名称">
-                        <button id="add-category">添加分类</button>
-                    </div>
-                    <ul id="category-list"></ul>
-                </div>
-                
-                <div class="prompt-section">
-                    <h3>提示词模板</h3>
-                    <div class="prompt-controls">
-                        <select id="category-selector"></select>
-                        <button id="add-prompt">添加提示词</button>
-                    </div>
-                    <ul id="prompt-list"></ul>
-                </div>
-            </div>
+        
+        <!-- 底部按钮 -->
+        <div class="footer-buttons">
+            <button id="save-config-bottom">保存配置</button>
         </div>
     </div>
     

@@ -29,6 +29,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             });
             return true;
             
+        case 'TEST_AI_API':
+            // 测试 AI API 连接（使用前端传递的配置）
+            testAIApiConnection(request.data).then(response => {
+                sendResponse({ success: true, data: response });
+            }).catch(error => {
+                sendResponse({ success: false, error: error.message });
+            });
+            return true;
+            
         case 'GET_HISTORY':
             // 获取对话历史
             getHistory().then(history => {
@@ -40,6 +49,15 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
             // 保存对话历史
             saveHistory(request.data).then(() => {
                 sendResponse({ success: true });
+            });
+            return true;
+            
+        case 'UPDATE_HISTORY_NAME':
+            // 更新对话历史名称
+            updateHistoryName(request.data.id, request.data.name).then(() => {
+                sendResponse({ success: true });
+            }).catch(error => {
+                sendResponse({ success: false, error: error.message });
             });
             return true;
             
@@ -72,7 +90,8 @@ async function getConfig() {
             'temperature', 
             'maxTokens',
             'categories',
-            'prompts'
+            'prompts',
+            'systemPrompt'
         ], (result) => {
             resolve({
                 apiUrl: result.apiUrl || 'https://api.openai.com/v1/chat/completions',
@@ -81,7 +100,8 @@ async function getConfig() {
                 temperature: result.temperature || 0.7,
                 maxTokens: result.maxTokens || 1024,
                 categories: result.categories || [],
-                prompts: result.prompts || []
+                prompts: result.prompts || [],
+                systemPrompt: result.systemPrompt || '你是一个网页内容分析助手，能够根据用户的需求分析网页内容并提供有用的信息。'
             });
         });
     });
@@ -138,6 +158,58 @@ async function callAIApi(data) {
         return await response.json();
     } catch (error) {
         console.error('API 调用错误:', error);
+        throw error;
+    }
+}
+
+// 测试 AI API 连接（使用传递的配置数据）
+async function testAIApiConnection(data) {
+    try {
+        // 使用前端传递的配置数据
+        const config = {
+            apiUrl: data.apiUrl,
+            apiKey: data.apiKey,
+            model: data.model,
+            temperature: data.temperature,
+            maxTokens: data.maxTokens
+        };
+        
+        if (!config.apiKey) {
+            throw new Error('API Key 未配置');
+        }
+        
+        if (!config.apiUrl) {
+            throw new Error('API URL 未配置');
+        }
+        
+        if (!config.model) {
+            throw new Error('模型未配置');
+        }
+        
+        const requestBody = {
+            model: config.model,
+            messages: data.messages,
+            temperature: parseFloat(config.temperature),
+            max_tokens: parseInt(config.maxTokens)
+        };
+        
+        const response = await fetchWithTimeout(config.apiUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${config.apiKey}`
+            },
+            body: JSON.stringify(requestBody)
+        }, 30000); // 30秒超时
+        
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({}));
+            throw new Error(errorData.error?.message || `API 请求失败: ${response.status} ${response.statusText}`);
+        }
+        
+        return await response.json();
+    } catch (error) {
+        console.error('API 测试连接错误:', error);
         throw error;
     }
 }
@@ -201,6 +273,29 @@ async function deleteHistory(id) {
     });
 }
 
+// 更新对话历史名称
+async function updateHistoryName(id, name) {
+    // 获取现有历史记录
+    const history = await getHistory();
+    
+    // 查找要更新的记录
+    const itemIndex = history.findIndex(item => item.id == id);
+    
+    if (itemIndex >= 0) {
+        // 更新记录名称
+        history[itemIndex].name = name;
+        
+        // 保存更新后的历史记录
+        return new Promise((resolve) => {
+            chrome.storage.local.set({ chatHistory: history }, () => {
+                resolve();
+            });
+        });
+    } else {
+        throw new Error('未找到指定的历史记录');
+    }
+}
+
 // 清空对话历史
 async function clearHistory() {
     return new Promise((resolve) => {
@@ -227,7 +322,8 @@ function initializeDefaultConfig() {
         'temperature', 
         'maxTokens',
         'categories',
-        'prompts'
+        'prompts',
+        'systemPrompt'
     ], (result) => {
         // 如果没有配置，设置默认值
         const defaultConfig = {};
@@ -250,6 +346,10 @@ function initializeDefaultConfig() {
         
         if (result.maxTokens === undefined) {
             defaultConfig.maxTokens = 1024;
+        }
+        
+        if (result.systemPrompt === undefined) {
+            defaultConfig.systemPrompt = '你是一个网页内容分析助手，能够根据用户的需求分析网页内容并提供有用的信息。';
         }
         
         if (result.categories === undefined) {

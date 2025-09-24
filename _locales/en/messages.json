@@ -56,6 +56,9 @@
   "promptTemplate": {
     "message": "Prompt Template"
   },
+  "systemPrompts": {
+    "message": "System Prompts"
+  },
   "addPrompt": {
     "message": "Add Prompt"
   }

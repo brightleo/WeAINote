@@ -127,20 +127,40 @@ button:hover {
     border: 1px solid #ebccd1;
 }
 
-.category-section, .prompt-section {
+.prompt-section {
     margin-bottom: 20px;
 }
 
-.category-controls, .prompt-controls {
+.prompt-controls {
     margin-bottom: 15px;
 }
 
-#category-list, #prompt-list {
+.system-prompts-container {
+    margin-bottom: 20px;
+}
+
+.system-prompt-item {
+    padding: 10px;
+    border: 1px solid #eee;
+    margin-bottom: 5px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f9f9f9;
+}
+
+.system-prompt-item strong {
+    color: #666;
+}
+
+#system-prompt-list,
+#prompt-list {
     list-style-type: none;
     padding: 0;
 }
 
-#category-list li, #prompt-list li {
+#prompt-list li {
     padding: 10px;
     border: 1px solid #eee;
     margin-bottom: 5px;
@@ -293,4 +313,58 @@ button:hover {
 .data-actions button {
     flex: 1;
     min-width: 120px;
+}
+
+/* Tab导航样式 */
+.tab-navigation {
+    display: flex;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+}
+
+.tab-button {
+    background-color: #e0e0e0; /* 修改未选中Tab的颜色 */
+    border: 1px solid #ccc;
+    border-bottom: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-radius: 4px 4px 0 0;
+    margin-right: 5px;
+    color: #333; /* 修改文字颜色 */
+}
+
+.tab-button.active {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+.tab-button:hover:not(.active) {
+    background-color: #d0d0d0; /* 修改悬停时的颜色 */
+}
+
+/* Tab内容样式 */
+.tab-content {
+    margin-bottom: 30px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+/* 底部按钮样式 */
+.footer-buttons {
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.footer-buttons button {
+    min-width: 150px;
 }

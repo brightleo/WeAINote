@@ -55,7 +55,10 @@ function loadMarkdownIt() {
         document.body.appendChild(floatButton);
         
         // 绑定点击事件
-        floatButton.addEventListener('click', toggleDialog);
+        floatButton.addEventListener('click', function(e) {
+            e.stopPropagation(); // 阻止事件冒泡到document
+            toggleDialog();
+        });
     }
     
     // 创建对话窗口
@@ -71,7 +74,6 @@ function loadMarkdownIt() {
                     <select id="weainote-prompt-select" class="weainote-prompt-select">
                         <option value="">选择提示词</option>
                     </select>
-                    <button class="weainote-dialog-close">&times;</button>
                 </div>
             </div>
             <div class="weainote-dialog-messages" id="weainote-dialog-messages">
@@ -88,7 +90,6 @@ function loadMarkdownIt() {
         document.body.appendChild(dialog);
         
         // 绑定事件
-        document.querySelector('.weainote-dialog-close').addEventListener('click', hideDialog);
         document.getElementById('weainote-send-button').addEventListener('click', sendMessage);
         document.getElementById('weainote-input-field').addEventListener('keypress', function(e) {
             if (e.key === 'Enter' && !e.ctrlKey) {
@@ -123,27 +124,7 @@ function loadMarkdownIt() {
                     promptSelect.appendChild(option);
                 });
                 
-                // 默认选择第一个提示词（如果存在）
-                if (prompts.length > 0) {
-                    // 查找"总结"相关的提示词
-                    const summaryPrompt = prompts.find(prompt => 
-                        prompt.title.includes('总结') || prompt.title.includes('summary') || prompt.title.includes('Summary')
-                    );
-                    
-                    if (summaryPrompt) {
-                        promptSelect.value = summaryPrompt.id;
-                        // 触发change事件来设置currentPrompt
-                        const event = new Event('change');
-                        promptSelect.dispatchEvent(event);
-                    } else {
-                        // 如果没有找到总结提示词，默认选择第一个
-                        promptSelect.value = prompts[0].id;
-                        // 触发change事件来设置currentPrompt
-                        const event = new Event('change');
-                        promptSelect.dispatchEvent(event);
-                    }
-                }
-                
+                // 不再默认选择任何提示词，保持空白选项选中
                 // 确保发送按钮默认可用
                 const sendButton = document.getElementById('weainote-send-button');
                 if (sendButton) {
@@ -212,9 +193,13 @@ function loadMarkdownIt() {
             const historyItem = document.createElement('div');
             historyItem.className = 'weainote-history-item';
             const date = new Date(item.timestamp).toLocaleString();
+            
+            // 如果有名称则显示名称，否则显示日期
+            const displayName = item.name || date;
+            
             historyItem.innerHTML = `
                 <div class="weainote-history-item-header">
-                    <span class="weainote-history-date">${date}</span>
+                    <span class="weainote-history-name" data-id="${item.id}" title="点击编辑名称">${displayName}</span>
                     <div class="weainote-history-actions">
                         <button class="weainote-history-load" data-id="${item.id}">加载</button>
                         <button class="weainote-history-delete" data-id="${item.id}">删除</button>
@@ -241,6 +226,63 @@ function loadMarkdownIt() {
             btn.addEventListener('click', function() {
                 const id = this.getAttribute('data-id');
                 deleteConversation(id);
+            });
+        });
+        
+        // 绑定历史记录名称修改事件
+        document.querySelectorAll('.weainote-history-name').forEach(nameElement => {
+            // 保存原始名称
+            const originalName = nameElement.textContent;
+            
+            // 添加提示信息
+            nameElement.setAttribute('title', '点击编辑名称');
+            
+            // 双击时进入编辑状态
+            nameElement.addEventListener('dblclick', function() {
+                this.setAttribute('contenteditable', 'true');
+                this.focus();
+                
+                // 选中所有文本
+                const selection = window.getSelection();
+                const range = document.createRange();
+                range.selectNodeContents(this);
+                selection.removeAllRanges();
+                selection.addRange(range);
+            });
+            
+            // 失去焦点时保存修改
+            nameElement.addEventListener('blur', function() {
+                // 退出编辑状态
+                this.removeAttribute('contenteditable');
+                
+                const id = this.getAttribute('data-id');
+                const newName = this.textContent.trim();
+                
+                // 如果名称为空，恢复为日期
+                if (!newName) {
+                    const item = history.find(item => item.id == id);
+                    if (item) {
+                        const date = new Date(item.timestamp).toLocaleString();
+                        this.textContent = date;
+                    }
+                    return;
+                }
+                
+                // 如果名称没有改变，不需要保存
+                if (newName === originalName) {
+                    return;
+                }
+                
+                // 保存修改后的名称
+                updateConversationName(id, newName);
+            });
+            
+            // 按回车键时保存修改
+            nameElement.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    this.blur(); // 触发失去焦点事件
+                }
             });
         });
     }
@@ -273,6 +315,19 @@ function loadMarkdownIt() {
                 showHistory(); // 重新显示历史记录
             } else {
                 alert('删除失败：' + response.error);
+            }
+        });
+    }
+    
+    // 更新对话历史名称
+    function updateConversationName(id, newName) {
+        // 发送消息到后台脚本更新历史记录名称
+        chrome.runtime.sendMessage({
+            type: 'UPDATE_HISTORY_NAME',
+            data: { id: id, name: newName }
+        }, (response) => {
+            if (!response.success) {
+                console.error('更新历史记录名称失败：' + response.error);
             }
         });
     }
@@ -345,11 +400,32 @@ function loadMarkdownIt() {
     function showDialog() {
         document.getElementById('weainote-dialog').classList.remove('hidden');
         document.getElementById('weainote-input-field').focus();
+        
+        // 添加点击外部隐藏对话框的事件监听器
+        setTimeout(() => {
+            document.addEventListener('click', handleOutsideClick);
+        }, 0);
     }
     
     // 隐藏对话窗口
     function hideDialog() {
         document.getElementById('weainote-dialog').classList.add('hidden');
+        
+        // 移除点击外部隐藏对话框的事件监听器
+        document.removeEventListener('click', handleOutsideClick);
+    }
+    
+    // 处理点击对话框外部的事件
+    function handleOutsideClick(e) {
+        const dialog = document.getElementById('weainote-dialog');
+        if (dialog && !dialog.contains(e.target) && !dialog.classList.contains('hidden')) {
+            // 检查点击的元素是否是悬浮按钮
+            const floatButton = document.getElementById('weainote-float-button');
+            if (floatButton && floatButton.contains(e.target)) {
+                return; // 如果点击的是悬浮按钮，则不隐藏对话框
+            }
+            hideDialog();
+        }
     }
     
     // 发送消息
@@ -374,59 +450,79 @@ function loadMarkdownIt() {
         // 获取当前网页内容
         const pageContent = document.body.innerText || document.body.textContent;
         
-        // 构造消息历史
-        let messages = [];
-        
-        if (currentPrompt) {
-            // 使用选中的提示词模板
-            const promptContent = currentPrompt.content.replace('{content}', pageContent.substring(0, 2000)).replace('{question}', userMessage);
-            
-            messages = [
-                {
-                    role: "system",
-                    content: "你是一个网页内容分析助手，能够根据用户的需求分析网页内容并提供有用的信息。"
-                },
-                {
-                    role: "user",
-                    content: promptContent
-                }
-            ];
-        } else {
-            // 使用默认提示词
-            messages = [
-                {
-                    role: "system",
-                    content: "你是一个网页内容分析助手，能够根据用户的需求分析网页内容并提供有用的信息。"
-                },
-                {
-                    role: "user",
-                    content: `请分析以下网页内容：
-
-${pageContent.substring(0, 2000)}
-
-用户问题：${userMessage}`
-                }
-            ];
-        }
-        
-        // 显示正在思考的状态
-        showThinkingStatus();
-        
-        // 发送消息到后台脚本
+        // 获取系统提示词
         chrome.runtime.sendMessage({
-            type: 'CALL_AI_API',
-            data: { messages: messages }
-        }, (response) => {
-            if (response.success) {
-                // 显示 AI 回复
-                const aiResponse = response.data.choices[0].message.content;
-                streamMessage(aiResponse);
-                addMessageToHistory(aiResponse, 'assistant');
-            } else {
-                // 显示错误信息
-                addMessageToUI(`错误：${response.error}`, 'ai');
-                addMessageToHistory(`错误：${response.error}`, 'assistant');
+            type: 'GET_CONFIG'
+        }, (configResponse) => {
+            // 构造消息历史
+            let messages = [];
+            
+            // 获取系统提示词，默认使用固定的系统提示词
+            let systemPrompt = "你是一个网页内容分析助手，能够根据用户的需求分析网页内容并提供有用的信息。";
+            
+            // 如果配置中有系统提示词，则使用配置中的
+            if (configResponse.success && configResponse.data.systemPrompt) {
+                systemPrompt = configResponse.data.systemPrompt;
             }
+            
+            if (currentPrompt) {
+                // 使用选中的提示词模板
+                const promptContent = currentPrompt.content.replace('{content}', pageContent.substring(0, 2000)).replace('{question}', userMessage);
+                
+                messages = [
+                    {
+                        role: "system",
+                        content: systemPrompt
+                    },
+                    {
+                        role: "user",
+                        content: promptContent
+                    }
+                ];
+            } else {
+                // 使用默认提示词
+                // 根据用户是否输入问题来调整提示词内容
+                let userContent = `请分析以下网页内容：
+
+${pageContent.substring(0, 2000)}`;
+                
+                if (userMessage) {
+                    userContent += `
+
+用户问题：${userMessage}`;
+                }
+                
+                messages = [
+                    {
+                        role: "system",
+                        content: systemPrompt
+                    },
+                    {
+                        role: "user",
+                        content: userContent
+                    }
+                ];
+            }
+            
+            // 显示正在思考的状态
+            showThinkingStatus();
+            
+            // 发送消息到后台脚本
+            chrome.runtime.sendMessage({
+                type: 'CALL_AI_API',
+                data: { messages: messages }
+            }, (response) => {
+                if (response.success) {
+                    // 显示 AI 回复
+                    const aiResponse = response.data.choices[0].message.content;
+                    streamMessage(aiResponse);
+                    addMessageToHistory(aiResponse, 'assistant');
+                } else {
+                    // 显示错误信息
+                    addMessageToUI(`错误：${response.error}`, 'ai');
+                    addMessageToHistory(`错误：${response.error}`, 'assistant');
+                }
+            });
         });
     }
     
@@ -436,7 +532,16 @@ ${pageContent.substring(0, 2000)}
         const messageElement = document.createElement('div');
         messageElement.className = 'weainote-message weainote-ai-message';
         messageElement.id = 'thinking-message';
-        messageElement.innerHTML = '<div class="weainote-markdown-content">正在思考中...</div>';
+        messageElement.innerHTML = `
+            <div class="weainote-markdown-content">
+                <div class="thinking-animation">
+                    <span>正在思考中</span>
+                    <div class="thinking-dot"></div>
+                    <div class="thinking-dot"></div>
+                    <div class="thinking-dot"></div>
+                </div>
+            </div>
+        `;
         messagesContainer.appendChild(messageElement);
         
         // 滚动到底部

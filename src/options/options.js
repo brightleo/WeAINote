@@ -18,16 +18,14 @@ function loadLocales() {
         temperature: '温度',
         maxTokens: '最大 Token 数',
         testConnection: '测试连接',
-        saveConfig: '保存配置',
         dataManagement: '数据管理',
         exportConfig: '导出配置',
         importConfig: '导入配置',
         promptManagement: '提示词管理',
-        categoryManagement: '分类管理',
-        newCategory: '新分类名称',
-        addCategory: '添加分类',
+        systemPrompts: '系统提示词',
         promptTemplate: '提示词模板',
-        addPrompt: '添加提示词'
+        addPrompt: '添加提示词',
+        saveConfig: '保存配置'
     };
     
     locales['en'] = {
@@ -39,16 +37,14 @@ function loadLocales() {
         temperature: 'Temperature',
         maxTokens: 'Max Tokens',
         testConnection: 'Test Connection',
-        saveConfig: 'Save Configuration',
         dataManagement: 'Data Management',
         exportConfig: 'Export Configuration',
         importConfig: 'Import Configuration',
         promptManagement: 'Prompt Management',
-        categoryManagement: 'Category Management',
-        newCategory: 'New Category Name',
-        addCategory: 'Add Category',
+        systemPrompts: 'System Prompts',
         promptTemplate: 'Prompt Template',
-        addPrompt: 'Add Prompt'
+        addPrompt: 'Add Prompt',
+        saveConfig: 'Save Configuration'
     };
 }
 
@@ -64,7 +60,10 @@ function updateUILanguage() {
     
     // 更新页面中的文本元素
     document.querySelector('h1').textContent = getMessage('configPageTitle');
-    document.querySelector('h2').textContent = getMessage('aiServiceConfig');
+    
+    // 更新Tab标签文本
+    document.querySelector('[data-tab="ai-config"]').textContent = getMessage('aiServiceConfig');
+    document.querySelector('[data-tab="prompt-config"]').textContent = getMessage('promptManagement');
     
     // 更新标签文本
     document.querySelector('label[for="api-url"]').textContent = getMessage('apiUrl');
@@ -75,7 +74,6 @@ function updateUILanguage() {
     
     // 更新按钮文本
     document.getElementById('test-api').textContent = getMessage('testConnection');
-    document.querySelector('button[type="submit"]').textContent = getMessage('saveConfig');
     
     // 更新数据管理部分
     document.querySelectorAll('h2')[1].textContent = getMessage('dataManagement');
@@ -83,12 +81,12 @@ function updateUILanguage() {
     document.getElementById('import-config').textContent = getMessage('importConfig');
     
     // 更新提示词管理部分
-    document.querySelectorAll('h2')[2].textContent = getMessage('promptManagement');
-    document.querySelectorAll('h3')[0].textContent = getMessage('categoryManagement');
-    document.getElementById('new-category').placeholder = getMessage('newCategory');
-    document.getElementById('add-category').textContent = getMessage('addCategory');
+    document.querySelectorAll('h3')[0].textContent = getMessage('systemPrompts');
     document.querySelectorAll('h3')[1].textContent = getMessage('promptTemplate');
     document.getElementById('add-prompt').textContent = getMessage('addPrompt');
+    
+    // 更新底部保存按钮
+    document.getElementById('save-config-bottom').textContent = getMessage('saveConfig');
 }
 
 // API 配置相关函数
@@ -102,21 +100,43 @@ document.addEventListener('DOMContentLoaded', function() {
     // 加载已保存的配置
     loadConfig();
     
+    // 绑定Tab切换事件
+    bindTabEvents();
+    
     // 绑定事件监听器
-    document.getElementById('api-config-form').addEventListener('submit', saveConfig);
+    document.getElementById('api-config-form').addEventListener('submit', function(e) { e.preventDefault(); });
     document.getElementById('test-api').addEventListener('click', testApiConnection);
     document.getElementById('temperature').addEventListener('input', updateTemperatureValue);
-    document.getElementById('add-category').addEventListener('click', addCategory);
     document.getElementById('add-prompt').addEventListener('click', showAddPromptModal);
     document.getElementById('export-config').addEventListener('click', exportConfig);
     document.getElementById('import-config').addEventListener('click', triggerImportConfig);
     document.getElementById('import-file').addEventListener('change', importConfig);
     document.getElementById('language').addEventListener('change', changeLanguage);
+    document.getElementById('save-config-bottom').addEventListener('click', saveConfig);
     
-    // 加载分类和提示词
-    loadCategories();
+    // 加载提示词
     loadPrompts();
 });
+
+// 绑定Tab切换事件
+function bindTabEvents() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabId = this.getAttribute('data-tab');
+            
+            // 更新活动Tab按钮
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // 更新活动Tab内容
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            document.getElementById(`${tabId}-tab`).classList.add('active');
+        });
+    });
+}
 
 // 加载语言设置
 function loadLanguageSetting() {
@@ -152,6 +172,7 @@ function loadConfig() {
         'model', 
         'temperature', 
         'maxTokens'
+        // 注意：systemPrompt 不在这里加载，因为它在系统提示词编辑模态框中处理
     ], function(result) {
         if (result.apiUrl) document.getElementById('api-url').value = result.apiUrl;
         if (result.apiKey) document.getElementById('api-key').value = result.apiKey;
@@ -161,19 +182,19 @@ function loadConfig() {
             document.getElementById('temperature-value').textContent = result.temperature;
         }
         if (result.maxTokens) document.getElementById('max-tokens').value = result.maxTokens;
+        // systemPrompt 不在这里处理
     });
 }
 
 // 保存配置
-function saveConfig(event) {
-    event.preventDefault();
-    
+function saveConfig() {
     const config = {
         apiUrl: document.getElementById('api-url').value,
         apiKey: document.getElementById('api-key').value,
         model: document.getElementById('model').value,
         temperature: document.getElementById('temperature').value,
         maxTokens: document.getElementById('max-tokens').value
+        // 注意：systemPrompt 不在这里保存，因为它在系统提示词编辑模态框中处理
     };
     
     chrome.storage.sync.set(config, function() {
@@ -183,9 +204,12 @@ function saveConfig(event) {
 
 // 测试 API 连接
 function testApiConnection() {
+    // 使用页面当前的数据，而不是保存后的数据
     const apiUrl = document.getElementById('api-url').value;
     const apiKey = document.getElementById('api-key').value;
     const model = document.getElementById('model').value;
+    const temperature = document.getElementById('temperature').value;
+    const maxTokens = document.getElementById('max-tokens').value;
     
     if (!apiUrl) {
         showTestResult(currentLanguage === 'zh-CN' ? '请输入 API URL' : 'Please enter API URL', 'error');
@@ -207,10 +231,15 @@ function testApiConnection() {
     document.getElementById('test-api').disabled = true;
     document.getElementById('test-api').textContent = currentLanguage === 'zh-CN' ? '测试中...' : 'Testing...';
     
-    // 发送测试消息到后台脚本
+    // 发送测试消息到后台脚本，使用页面当前的数据
     chrome.runtime.sendMessage({
-        type: 'CALL_AI_API',
+        type: 'TEST_AI_API',
         data: {
+            apiUrl: apiUrl,
+            apiKey: apiKey,
+            model: model,
+            temperature: parseFloat(temperature),
+            maxTokens: parseInt(maxTokens),
             messages: [
                 {
                     role: "user",
@@ -223,14 +252,15 @@ function testApiConnection() {
         document.getElementById('test-api').textContent = getMessage('testConnection');
         
         if (response.success) {
-            showTestResult(currentLanguage === 'zh-CN' ? 'API 连接成功！' : 'API connection successful!', 'success');
+            // 显示测试结果弹框
+            showTestResultModal(currentLanguage === 'zh-CN' ? 'API 连接成功！' : 'API connection successful!', 'success');
         } else {
-            showTestResult(`${currentLanguage === 'zh-CN' ? '测试失败：' : 'Test failed: '} ${response.error}`, 'error');
+            showTestResultModal(`${currentLanguage === 'zh-CN' ? '测试失败：' : 'Test failed: '} ${response.error}`, 'error');
         }
     });
 }
 
-// 显示测试结果
+// 显示测试结果（用于页面内显示）
 function showTestResult(message, type) {
     const resultElement = document.getElementById('test-result');
     resultElement.textContent = message;
@@ -241,6 +271,48 @@ function showTestResult(message, type) {
     setTimeout(() => {
         resultElement.style.display = 'none';
     }, 3000);
+}
+
+// 显示测试结果弹框
+function showTestResultModal(message, type) {
+    // 创建模态框
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.id = 'result-modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <div class="modal-header" style="background-color: ${type === 'success' ? '#4CAF50' : '#F44336'}">
+                <h3>${currentLanguage === 'zh-CN' ? '测试结果' : 'Test Result'}</h3>
+                <span class="modal-close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>${message}</p>
+            </div>
+            <div class="modal-footer">
+                <button id="close-result-modal" class="save-btn">${currentLanguage === 'zh-CN' ? '确定' : 'OK'}</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    
+    // 绑定事件
+    document.querySelector('#result-modal .modal-close').addEventListener('click', closeResultModal);
+    document.getElementById('close-result-modal').addEventListener('click', closeResultModal);
+    
+    // 点击模态框外部关闭
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            closeResultModal();
+        }
+    });
+}
+
+// 关闭测试结果弹框
+function closeResultModal() {
+    const modal = document.getElementById('result-modal');
+    if (modal) {
+        modal.remove();
+    }
 }
 
 // 导出配置
@@ -300,7 +372,6 @@ function importConfig(event) {
                 
                 // 重新加载配置显示
                 loadConfig();
-                loadCategories();
                 loadPrompts();
             });
         } catch (error) {
@@ -323,131 +394,123 @@ function showImportResult(message, type) {
     }, 3000);
 }
 
-// 分类管理相关函数
-function loadCategories() {
-    chrome.storage.sync.get(['categories'], function(result) {
-        const categories = result.categories || [];
-        renderCategories(categories);
-        populateCategorySelector(categories);
-    });
-}
-
-function renderCategories(categories) {
-    const categoryList = document.getElementById('category-list');
-    categoryList.innerHTML = '';
-    
-    categories.forEach((category, index) => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-            <span>${category.name}</span>
-            <div class="category-actions">
-                <button class="edit-btn" data-index="${index}">${currentLanguage === 'zh-CN' ? '编辑' : 'Edit'}</button>
-                <button class="delete-btn" data-index="${index}">${currentLanguage === 'zh-CN' ? '删除' : 'Delete'}</button>
-            </div>
-        `;
-        categoryList.appendChild(li);
-    });
-    
-    // 绑定编辑和删除事件
-    document.querySelectorAll('.edit-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const index = this.getAttribute('data-index');
-            editCategory(index);
-        });
-    });
-    
-    document.querySelectorAll('.delete-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const index = this.getAttribute('data-index');
-            deleteCategory(index);
-        });
-    });
-}
-
-function populateCategorySelector(categories) {
-    const selector = document.getElementById('category-selector');
-    selector.innerHTML = '';
-    
-    categories.forEach(category => {
-        const option = document.createElement('option');
-        option.value = category.id;
-        option.textContent = category.name;
-        selector.appendChild(option);
-    });
-}
-
-function addCategory() {
-    const categoryName = document.getElementById('new-category').value.trim();
-    if (!categoryName) {
-        alert(currentLanguage === 'zh-CN' ? '请输入分类名称' : 'Please enter category name');
-        return;
-    }
-    
-    chrome.storage.sync.get(['categories'], function(result) {
-        const categories = result.categories || [];
-        // 检查分类是否已存在
-        if (categories.some(cat => cat.name === categoryName)) {
-            alert(currentLanguage === 'zh-CN' ? '分类名称已存在' : 'Category name already exists');
-            return;
-        }
-        
-        categories.push({ id: Date.now(), name: categoryName });
-        
-        chrome.storage.sync.set({ categories: categories }, function() {
-            document.getElementById('new-category').value = '';
-            loadCategories();
-        });
-    });
-}
-
-function editCategory(index) {
-    chrome.storage.sync.get(['categories'], function(result) {
-        const categories = result.categories || [];
-        const newName = prompt(currentLanguage === 'zh-CN' ? '请输入新的分类名称:' : 'Please enter new category name:', categories[index].name);
-        
-        if (newName && newName.trim()) {
-            // 检查分类是否已存在
-            if (categories.some((cat, i) => i !== parseInt(index) && cat.name === newName.trim())) {
-                alert(currentLanguage === 'zh-CN' ? '分类名称已存在' : 'Category name already exists');
-                return;
-            }
-            
-            categories[index].name = newName.trim();
-            chrome.storage.sync.set({ categories: categories }, function() {
-                loadCategories();
-            });
-        }
-    });
-}
-
-function deleteCategory(index) {
-    if (!confirm(currentLanguage === 'zh-CN' ? '确定要删除这个分类吗？删除分类将同时删除该分类下的所有提示词模板。' : 'Are you sure you want to delete this category? Deleting the category will also delete all prompt templates under this category.')) return;
-    
-    chrome.storage.sync.get(['categories', 'prompts'], function(result) {
-        const categories = result.categories || [];
-        const categoryId = categories[index].id;
-        
-        // 删除分类
-        categories.splice(index, 1);
-        
-        // 删除该分类下的所有提示词
-        const prompts = (result.prompts || []).filter(prompt => prompt.categoryId !== categoryId);
-        
-        chrome.storage.sync.set({ 
-            categories: categories,
-            prompts: prompts
-        }, function() {
-            loadCategories();
-            loadPrompts();
-        });
-    });
-}
-
 // 提示词管理相关函数
 function loadPrompts() {
     chrome.storage.sync.get(['prompts'], function(result) {
         const prompts = result.prompts || [];
         renderPrompts(prompts);
+    });
+    
+    // 加载系统提示词
+    loadSystemPrompts();
+}
+
+function loadSystemPrompts() {
+    chrome.storage.sync.get(['systemPrompt'], function(result) {
+        // 系统提示词是固定的，但可以从存储中获取自定义的系统提示词
+        const systemPrompt = result.systemPrompt || '你是一个网页内容分析助手，能够根据用户的需求分析网页内容并提供有用的信息。';
+        
+        const systemPrompts = [
+            {
+                id: 'sys1',
+                title: '系统提示词',
+                content: systemPrompt
+            }
+        ];
+        
+        renderSystemPrompts(systemPrompts);
+    });
+}
+
+function renderSystemPrompts(prompts) {
+    const systemPromptList = document.getElementById('system-prompt-list');
+    systemPromptList.innerHTML = '';
+    
+    prompts.forEach((prompt) => {
+        const li = document.createElement('li');
+        li.className = 'system-prompt-item';
+        li.innerHTML = `
+            <div>
+                <strong>${prompt.title}</strong>
+                <div class="prompt-content">${prompt.content.substring(0, 100)}${prompt.content.length > 100 ? '...' : ''}</div>
+            </div>
+            <div class="prompt-actions">
+                <button class="edit-btn system-prompt-edit" data-id="${prompt.id}">${currentLanguage === 'zh-CN' ? '编辑' : 'Edit'}</button>
+            </div>
+        `;
+        systemPromptList.appendChild(li);
+    });
+    
+    // 绑定编辑事件
+    document.querySelectorAll('.system-prompt-edit').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const id = this.getAttribute('data-id');
+            editSystemPrompt(id);
+        });
+    });
+}
+
+function editSystemPrompt(id) {
+    chrome.storage.sync.get(['systemPrompt'], function(result) {
+        const systemPrompt = result.systemPrompt || '你是一个网页内容分析助手，能够根据用户的需求分析网页内容并提供有用的信息。';
+        
+        // 创建模态框
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'system-prompt-modal';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>${currentLanguage === 'zh-CN' ? '编辑系统提示词' : 'Edit System Prompt'}</h3>
+                    <span class="modal-close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="system-prompt-content">${currentLanguage === 'zh-CN' ? '系统提示词内容:' : 'System Prompt Content:'}</label>
+                        <textarea id="system-prompt-content" rows="8">${systemPrompt}</textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="save-system-prompt" class="save-btn">${currentLanguage === 'zh-CN' ? '保存' : 'Save'}</button>
+                    <button id="cancel-system-prompt" class="cancel-btn">${currentLanguage === 'zh-CN' ? '取消' : 'Cancel'}</button>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+        
+        // 绑定事件
+        document.querySelector('#system-prompt-modal .modal-close').addEventListener('click', closeSystemPromptModal);
+        document.getElementById('cancel-system-prompt').addEventListener('click', closeSystemPromptModal);
+        document.getElementById('save-system-prompt').addEventListener('click', saveSystemPrompt);
+        
+        // 点击模态框外部关闭
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                closeSystemPromptModal();
+            }
+        });
+    });
+}
+
+function closeSystemPromptModal() {
+    const modal = document.getElementById('system-prompt-modal');
+    if (modal) {
+        modal.remove();
+    }
+}
+
+function saveSystemPrompt() {
+    const content = document.getElementById('system-prompt-content').value.trim();
+    
+    if (!content) {
+        alert(currentLanguage === 'zh-CN' ? '请输入系统提示词内容' : 'Please enter system prompt content');
+        return;
+    }
+    
+    chrome.storage.sync.set({ systemPrompt: content }, function() {
+        closeSystemPromptModal();
+        loadSystemPrompts();
+        alert(currentLanguage === 'zh-CN' ? '系统提示词已保存！' : 'System prompt saved!');
     });
 }
 
@@ -455,44 +518,33 @@ function renderPrompts(prompts) {
     const promptList = document.getElementById('prompt-list');
     promptList.innerHTML = '';
     
-    // 获取分类信息用于显示
-    chrome.storage.sync.get(['categories'], function(result) {
-        const categories = result.categories || [];
-        const categoryMap = {};
-        categories.forEach(cat => {
-            categoryMap[cat.id] = cat.name;
+    prompts.forEach((prompt, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+            <div>
+                <strong>${prompt.title}</strong>
+                <div class="prompt-content">${prompt.content.substring(0, 100)}${prompt.content.length > 100 ? '...' : ''}</div>
+            </div>
+            <div class="prompt-actions">
+                <button class="edit-btn" data-index="${index}">${currentLanguage === 'zh-CN' ? '编辑' : 'Edit'}</button>
+                <button class="delete-btn" data-index="${index}">${currentLanguage === 'zh-CN' ? '删除' : 'Delete'}</button>
+            </div>
+        `;
+        promptList.appendChild(li);
+    });
+    
+    // 绑定编辑和删除事件
+    document.querySelectorAll('.edit-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const index = this.getAttribute('data-index');
+            editPrompt(index);
         });
-        
-        prompts.forEach((prompt, index) => {
-            const categoryName = categoryMap[prompt.categoryId] || (currentLanguage === 'zh-CN' ? '未知分类' : 'Unknown Category');
-            const li = document.createElement('li');
-            li.innerHTML = `
-                <div>
-                    <strong>${prompt.title}</strong>
-                    <div class="prompt-category">${currentLanguage === 'zh-CN' ? '分类:' : 'Category:'} ${categoryName}</div>
-                    <div class="prompt-content">${prompt.content.substring(0, 100)}${prompt.content.length > 100 ? '...' : ''}</div>
-                </div>
-                <div class="prompt-actions">
-                    <button class="edit-btn" data-index="${index}">${currentLanguage === 'zh-CN' ? '编辑' : 'Edit'}</button>
-                    <button class="delete-btn" data-index="${index}">${currentLanguage === 'zh-CN' ? '删除' : 'Delete'}</button>
-                </div>
-            `;
-            promptList.appendChild(li);
-        });
-        
-        // 绑定编辑和删除事件
-        document.querySelectorAll('.edit-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const index = this.getAttribute('data-index');
-                editPrompt(index);
-            });
-        });
-        
-        document.querySelectorAll('.delete-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const index = this.getAttribute('data-index');
-                deletePrompt(index);
-            });
+    });
+    
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const index = this.getAttribute('data-index');
+            deletePrompt(index);
         });
     });
 }
@@ -514,12 +566,8 @@ function showAddPromptModal() {
                     <input type="text" id="prompt-title" placeholder="${currentLanguage === 'zh-CN' ? '提示词模板标题' : 'Prompt template title'}">
                 </div>
                 <div class="form-group">
-                    <label for="prompt-category">${currentLanguage === 'zh-CN' ? '分类:' : 'Category:'}</label>
-                    <select id="prompt-category"></select>
-                </div>
-                <div class="form-group">
                     <label for="prompt-content">${currentLanguage === 'zh-CN' ? '内容:' : 'Content:'}</label>
-                    <textarea id="prompt-content" placeholder="${currentLanguage === 'zh-CN' ? '提示词内容，可以使用 {content} 占位符表示网页内容' : 'Prompt content, you can use {content} placeholder to represent web content'}" rows="6"></textarea>
+                    <textarea id="prompt-content" placeholder="${currentLanguage === 'zh-CN' ? '提示词内容，可以使用 {content} 占位符表示网页内容，{question} 占位符表示用户问题' : 'Prompt content, you can use {content} placeholder to represent web content, {question} placeholder to represent user questions'}" rows="6"></textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -529,20 +577,6 @@ function showAddPromptModal() {
         </div>
     `;
     document.body.appendChild(modal);
-    
-    // 填充分类选择器
-    chrome.storage.sync.get(['categories'], function(result) {
-        const categories = result.categories || [];
-        const selector = document.getElementById('prompt-category');
-        selector.innerHTML = '';
-        
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
-            selector.appendChild(option);
-        });
-    });
     
     // 绑定事件
     document.querySelector('.modal-close').addEventListener('click', closePromptModal);
@@ -566,7 +600,6 @@ function closePromptModal() {
 
 function savePrompt() {
     const title = document.getElementById('prompt-title').value.trim();
-    const categoryId = document.getElementById('prompt-category').value;
     const content = document.getElementById('prompt-content').value.trim();
     
     if (!title) {
@@ -583,7 +616,6 @@ function savePrompt() {
         const prompts = result.prompts || [];
         prompts.push({
             id: Date.now(),
-            categoryId: parseInt(categoryId),
             title: title,
             content: content
         });
@@ -596,9 +628,8 @@ function savePrompt() {
 }
 
 function editPrompt(index) {
-    chrome.storage.sync.get(['prompts', 'categories'], function(result) {
+    chrome.storage.sync.get(['prompts'], function(result) {
         const prompts = result.prompts || [];
-        const categories = result.categories || [];
         const prompt = prompts[index];
         
         // 创建模态框
@@ -617,12 +648,8 @@ function editPrompt(index) {
                         <input type="text" id="prompt-title" placeholder="${currentLanguage === 'zh-CN' ? '提示词模板标题' : 'Prompt template title'}" value="${prompt.title}">
                     </div>
                     <div class="form-group">
-                        <label for="prompt-category">${currentLanguage === 'zh-CN' ? '分类:' : 'Category:'}</label>
-                        <select id="prompt-category"></select>
-                    </div>
-                    <div class="form-group">
                         <label for="prompt-content">${currentLanguage === 'zh-CN' ? '内容:' : 'Content:'}</label>
-                        <textarea id="prompt-content" placeholder="${currentLanguage === 'zh-CN' ? '提示词内容，可以使用 {content} 占位符表示网页内容' : 'Prompt content, you can use {content} placeholder to represent web content'}" rows="6">${prompt.content}</textarea>
+                        <textarea id="prompt-content" placeholder="${currentLanguage === 'zh-CN' ? '提示词内容，可以使用 {content} 占位符表示网页内容，{question} 占位符表示用户问题' : 'Prompt content, you can use {content} placeholder to represent web content, {question} placeholder to represent user questions'}" rows="6">${prompt.content}</textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -632,20 +659,6 @@ function editPrompt(index) {
             </div>
         `;
         document.body.appendChild(modal);
-        
-        // 填充分类选择器并选中当前分类
-        const selector = document.getElementById('prompt-category');
-        selector.innerHTML = '';
-        
-        categories.forEach(category => {
-            const option = document.createElement('option');
-            option.value = category.id;
-            option.textContent = category.name;
-            if (category.id === prompt.categoryId) {
-                option.selected = true;
-            }
-            selector.appendChild(option);
-        });
         
         // 绑定事件
         document.querySelector('.modal-close').addEventListener('click', closePromptModal);
@@ -665,7 +678,6 @@ function editPrompt(index) {
 
 function updatePrompt(index) {
     const title = document.getElementById('prompt-title').value.trim();
-    const categoryId = document.getElementById('prompt-category').value;
     const content = document.getElementById('prompt-content').value.trim();
     
     if (!title) {
@@ -682,7 +694,6 @@ function updatePrompt(index) {
         const prompts = result.prompts || [];
         prompts[index] = {
             id: prompts[index].id,
-            categoryId: parseInt(categoryId),
             title: title,
             content: content
         };
